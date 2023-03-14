@@ -15,11 +15,21 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
-app.get('/talker', async (req, res) => {
+app.get('/talker', async (_req, res) => {
     const fileContent = await readJsonData(talkerPath);
     return res.status(HTTP_OK_STATUS).json(fileContent);
 });
 
+app.get('/talker/:id', async (req, res) => {
+    const { id } = req.params;
+    const fileContent = await readJsonData(talkerPath);
+    const talkerById = fileContent.find((talker) => talker.id === Number(id));
+    if(!talkerById) {
+     return res.status(404).json({ message: "Pessoa palestrante não encontrada" });
+    }
+    return res.status(200).json(talkerById);
+});
+
 app.listen(PORT, () => {
-  console.log('Ola, tudo bem?');
+  console.log(`Listening on port: ${PORT}`);
 });
