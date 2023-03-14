@@ -37,9 +37,9 @@ function generateToken() {
 }
 
 app.post('/login', (req, res) => {
-    const { email, password } = req.body;
+    // const { email, password } = req.body;
     const token = generateToken();
-    return res.status(200).json({ token: token });
+    return res.status(200).json({ token });
 });
 
 app.listen(PORT, () => {
