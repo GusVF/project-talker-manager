@@ -1,5 +1,5 @@
 const express = require('express');
-const fs = require('fs').promises;
+// const fs = require('fs').promises;
 const path = require('path');
 const readJsonData = require('./utils/fs/readJsonData');
 
@@ -15,7 +15,7 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
-app.get('/talker', async (req, res) =>{
+app.get('/talker', async (req, res) => {
     const fileContent = await readJsonData(talkerPath);
     return res.status(HTTP_OK_STATUS).json(fileContent);
 });
