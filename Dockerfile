@@ -1,6 +1,6 @@
 FROM node:16.14.2
 
-# Diretório padrão de execução
+
 WORKDIR /app
 
 # Instala as dependências Node
