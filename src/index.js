@@ -50,12 +50,35 @@ validateRate,
   const fileContent = await readTalkerFiles();
   const newTalker = { id: fileContent.length + 1, ...req.body };
   fileContent.push(newTalker);
-  // const allTalkers = JSON.stringify([...fileContent, newTalker]);
   await fs.writeFile('./src/talker.json', JSON.stringify(fileContent, null, 2));
   return res.status(201).json(newTalker);
   } catch (error) {
    return res.status(500).json({ message: error.message });
   }
+});
+
+app.put('/talker/:id',
+tokenAuth,
+validateName,
+validateAge,
+validateTalk,
+validateWatchedAT,
+validateRateExist,
+validateRate, async (req, res) => {
+  const { id } = req.params;
+  const { name, age, talk } = req.body;
+   const talkers = await readTalkerFiles();
+   const talkerUpdate = talkers.findIndex((talker) => talker.id === Number(id));
+   console.log(talkerUpdate);
+   if (talkerUpdate === -1) {
+    return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+   }
+   talkers[talkerUpdate].name = name;
+   talkers[talkerUpdate].age = age;
+   talkers[talkerUpdate].talk.watchedAt = talk.watchedAt;
+   talkers[talkerUpdate].talk.rate = talk.rate;
+   await fs.writeFile('./src/talker.json', JSON.stringify(talkers), null, 2);
+   return res.status(200).json(talkers[talkerUpdate]);
 });
 
 // não remova esse endpoint, e para o avaliador funcionar
