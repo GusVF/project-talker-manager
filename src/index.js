@@ -1,11 +1,16 @@
 const express = require('express');
+const fs = require('fs').promises;
 const { readTalkerFiles } = require('./utils/readAndWriteFiles');
+const authTalker = require('./middlewares/authTalker');
+const validateName = require('./middlewares/validateName');
+const validateAge = require('./middlewares/validateAge');
+const validateWatcheAT = require('./middlewares/validateWatchedAt');
+const validateRate = require('./middlewares/validateRate');
 const generateToken = require('./utils/generateToken');
-const validateEmail = require('./utils/validateEmail');
+const loginValidation = require('./middlewares/authorization');
 
 const app = express();
 app.use(express.json());
-// const router = express.Router();
 
 const HTTP_OK_STATUS = 200;
 const PORT = process.env.PORT || '3001';
@@ -16,7 +21,7 @@ app.get('/talker', async (_req, res) => {
     return res.status(200).json(talkers);
 });
 
-// 2 - Crie o endpoint GET /talker/:id
+// 2 --------------->
 app.get('/talker/:id', async (req, res) => {
     const { id } = req.params;
     const fileContent = await readTalkerFiles();
@@ -27,26 +32,28 @@ app.get('/talker/:id', async (req, res) => {
     return res.status(200).json(talkerById);
 });
 
-// 3 - Crie o endpoint POST /login
-// 4 - Adicione as validações para o endpoint /login
-const getAuthorization = (req, res) => {
-    const { email, password } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: 'O campo "email" é obrigatório' });
-    }
-    if (!validateEmail(email)) {
-      return res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
-    }
-    if (!password) return res.status(400).json({ message: 'O campo "password" é obrigatório' });
+app.post('/talker',
+generateToken,
+authTalker,
+validateName,
+validateAge,
+validateWatcheAT,
+validateRate, async (req, res) => {
+  try {
+  const fileContent = await readTalkerFiles();
+  const newTalker = { id: fileContent.length + 1, ...req.body };
+  const allTalkers = JSON.stringify([...fileContent, newTalker]);
+  await fs.writeFile('./src/talker', allTalkers);
+  res.status(201).json(newTalker);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
 
-    if (password.length < 6) {
-      return res.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
-    }
-    const token = generateToken();
-    return res.status(200).json({ token });
-};
-
-app.post('/login', getAuthorization);
+// requisitos 3 e 4 ------------>
+app.post('/login', loginValidation, async (_req, _res) => {
+  console.log('oi');
+});
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
