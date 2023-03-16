@@ -69,7 +69,6 @@ validateRate, async (req, res) => {
   const { name, age, talk } = req.body;
    const talkers = await readTalkerFiles();
    const talkerUpdate = talkers.findIndex((talker) => talker.id === Number(id));
-   console.log(talkerUpdate);
    if (talkerUpdate === -1) {
     return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
    }
@@ -79,6 +78,18 @@ validateRate, async (req, res) => {
    talkers[talkerUpdate].talk.rate = talk.rate;
    await fs.writeFile('./src/talker.json', JSON.stringify(talkers), null, 2);
    return res.status(200).json(talkers[talkerUpdate]);
+});
+
+app.delete('/talker/:id', tokenAuth, async (req, res) => {
+    const { id } = req.params;
+    const talkers = await readTalkerFiles();
+    const deleteTalker = talkers.findIndex((talker) => talker.id === Number(id));
+    if (deleteTalker === -1) {
+       res.status(401).send();
+    }
+    talkers.splice(deleteTalker, 1);
+    await fs.writeFile('./src/talker.json', JSON.stringify(talkers), null, 2);
+    return res.status(204).send();
 });
 
 // não remova esse endpoint, e para o avaliador funcionar
