@@ -16,6 +16,23 @@ app.use(express.json());
 const HTTP_OK_STATUS = 200;
 const PORT = process.env.PORT || '3001';
 
+app.get('/talker/search', tokenAuth, async (req, res) => {
+   try {
+      const { q } = req.query;
+      const talkers = await readTalkerFiles();
+      if (!q) {
+        return res.status(200).json(talkers);
+      }
+      if (q) {
+        const filterTalker = talkers.filter((talker) => talker.name.includes(q));
+        return res.status(200).json(filterTalker);
+      }
+      return res.status(200).end();
+   } catch (error) {
+    res.status(500).send({ message: error.message });
+   }
+});
+
 // 1 - Crie o endpoint GET /talker
 app.get('/talker', async (_req, res) => {
     const talkers = await readTalkerFiles();
