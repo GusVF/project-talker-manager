@@ -8,7 +8,7 @@ const validateWatchedAT = require('./middlewares/validateWatchedAt');
 const validateRate = require('./middlewares/validateRate');
 const loginValidation = require('./middlewares/loginValidation');
 const validateTalk = require('./middlewares/validateTalk');
-const validateRateExist = require('./middlewares/validateRateExist');
+const validateRateExist = require('./middlewares/validateRateExist'); 
 
 const app = express();
 app.use(express.json());
@@ -16,30 +16,30 @@ app.use(express.json());
 const HTTP_OK_STATUS = 200;
 const PORT = process.env.PORT || '3001';
 
-app.get('/talker/search', tokenAuth, async (req, res) => {
-   try {
+// requisito 08 ------------>
+app.get('/talker/search', 
+tokenAuth,
+ async (req, res) => {
       const { q } = req.query;
+      // console.log(req.query);
       const talkers = await readTalkerFiles();
+      if (q) {
+        const filterByQ = talkers.filter((talker) => talker.name.includes(q));
+        return res.status(200).json(filterByQ);
+      }
       if (!q) {
         return res.status(200).json(talkers);
       }
-      if (q) {
-        const filterTalker = talkers.filter((talker) => talker.name.includes(q));
-        return res.status(200).json(filterTalker);
-      }
       return res.status(200).end();
-   } catch (error) {
-    res.status(500).send({ message: error.message });
-   }
 });
 
-// 1 - Crie o endpoint GET /talker
+// requisito 01 --------------->
 app.get('/talker', async (_req, res) => {
     const talkers = await readTalkerFiles();
     return res.status(200).json(talkers);
 });
 
-// 2 --------------->
+// requisito  02 --------------->
 app.get('/talker/:id', async (req, res) => {
     const { id } = req.params;
     const fileContent = await readTalkerFiles();
@@ -49,11 +49,13 @@ app.get('/talker/:id', async (req, res) => {
     }
     return res.status(200).json(talkerById);
 });
-// requisitos 3 e 4 ------------>
+
+// requisitos 03 e 04 ------------>
 app.post('/login', loginValidation, async (_req, _res) => {
   // console.log('oi');
 });
 
+// requisito 05 ------------->
 app.post('/talker',
 tokenAuth,
 validateName,
@@ -74,6 +76,7 @@ validateRate,
   }
 });
 
+// requisito 06 ------------>
 app.put('/talker/:id',
 tokenAuth,
 validateName,
@@ -97,6 +100,7 @@ validateRate, async (req, res) => {
    return res.status(200).json(talkers[talkerUpdate]);
 });
 
+// requisito 07 --------------->
 app.delete('/talker/:id', tokenAuth, async (req, res) => {
     const { id } = req.params;
     const talkers = await readTalkerFiles();
